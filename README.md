@@ -9,3 +9,7 @@ Once you plot in your browser the various services with pins ( right click on a 
 in the browser to a file and load that file to do various experiments with optaplanner or jsprit.
 
 You can then input that json back into the browser, and the map will load that json and recreate your pins or services.
+
+Picture here:
+
+https://github.com/ionescudev/MapToolMVC/blob/master/MapToolMVC/Capture.PNG
