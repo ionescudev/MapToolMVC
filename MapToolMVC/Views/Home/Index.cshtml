@@ -41,7 +41,7 @@
         var marker = L.marker([ClickOptions.latlng.lat, ClickOptions.latlng.lng],
             { id: newServiceName, draggable: 'true' });
             var popup = new L.Popup({ 'autoClose': false, closeOnClick: false, draggable: 'true' });
-       
+
         popup.setContent(`<div class="popupcontainer" id="` + newServiceName + `" style="color:red">
                             Id:
                             <input style="width: 75px;" onchange="changedSN(this)"
@@ -51,14 +51,14 @@
                             <input style="width: 30px;" onchange="updateDuration(this)" Id="Duration" value=`+ "0" +` />
                             <br>
                             Y
-                            <input style="width: 60px;" class="CoordY" value=`+ ClickOptions.latlng.lat +` />                           
+                            <input style="width: 60px;" class="CoordY" value=`+ ClickOptions.latlng.lat +` />
                             X
                             <input style="width: 60px;" class="CoordX" value=`+ ClickOptions.latlng.lng +` />
                             <button onclick="removeEl(this)">X</button>
                             </div>`);
 
         marker.addTo(markerGroup).bindPopup(popup).openPopup();
-        
+
             modelJavascript.push({
                 "Id": newServiceName,
                 "CoordY": ClickOptions.latlng.lat,
@@ -100,13 +100,13 @@
             var popup = new L.Popup({ 'autoClose': false, closeOnClick: false, draggable: 'true' });
 
             popup.setContent(`<div id="@mapModel.Id" style="color:red">
-        
+
                             Id:
                             <input style="width: 75px;" onchange="changedSN(this)"
-                                oldvalue="@mapModel.Id" 
+                                oldvalue="@mapModel.Id"
                                 class="ServiceId" value="@mapModel.Id" />
                             Y
-                            <input style="width: 60px;" id="CoordY" value=`+ @mapModel.CoordY +` />                           
+                            <input style="width: 60px;" id="CoordY" value=`+ @mapModel.CoordY +` />
                             X
                             <input style="width: 60px;"  id="CoordX" value=`+ @mapModel.CoordX +` />
                             <br>
@@ -124,7 +124,7 @@
                 var position = marker.getLatLng();
                 marker.openPopup();
                 setTimeout(function () {
-                    var $element = $("#" + event.target.options.id);                    
+                    var $element = $("#" + event.target.options.id);
                     $element.find(".CoordX").val(position.lng);
                     $element.find(".CoordY").val(position.lat);
                     for (var i = 0; i < modelJavascript.length; i++) {
@@ -145,7 +145,7 @@
     }
 
 
-    function changedSN(element) {        
+    function changedSN(element) {
         for (var i = 0; i < modelJavascript.length; i++) {
             var curModelEl = modelJavascript[i].Id;
             if (curModelEl === element.getAttribute("oldvalue")) {
@@ -161,7 +161,7 @@
             var elementId = $(element.parentElement).find(".ServiceId").val();
             if (elementId === modelJavascript[i].Id) {
                 modelJavascript[i].Duration = element.value;
-                element.setAttribute("oldvalue", element.value);                
+                element.setAttribute("oldvalue", element.value);
             }
         }
     }
@@ -185,12 +185,12 @@
                 }
             }
         }
-     
+
     }
 
     function downloadJson() {
         var modelToConstruct = [];
-        for (var i = 0; i < modelJavascript.length; i++) {            
+        for (var i = 0; i < modelJavascript.length; i++) {
             modelToConstruct.push({
                 "Id": modelJavascript[i].Id,
                 "CoordY": modelJavascript[i].CoordY,
@@ -202,9 +202,17 @@
         alert(JSON.stringify(modelToConstruct));
     }
 </script>
-<input  placeholder="The id of the new service to create " style="width:300px;border:2px solid red" id="newServiceId"/>
+<input placeholder="The id of the new service to create after right clicking on map" style="width:500px;border:2px solid red" id="newServiceId" />
+<br />
+<br />
+
 <button onclick="downloadJson()">DOWNLOAD JSON MODEL</button>
+<br />
+<br />
 <form action="/Home/IndexPost" target="_blank" method="post">
-    <input id="postTextArea" name="postTextArea">
+    <input placeholder="put json here" id="postTextArea" name="postTextArea">
     <button> Open jsoned model in new window</button>
 </form>
+
+<br />
+<br />
