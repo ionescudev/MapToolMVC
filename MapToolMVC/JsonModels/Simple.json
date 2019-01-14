@@ -1,0 +1,16 @@
+[
+  {
+    "Id": "Service1",
+    "CoordY": 44.41808794374849,
+    "CoordX": 26.08737945556641,
+    "Duration": "33",
+    "TimeWindows": []
+  },
+  {
+    "Id": "newid",
+    "CoordY": 44.4147773951185,
+    "CoordX": 26.13630294799805,
+    "Duration": "55",
+    "TimeWindows": []
+  }
+]

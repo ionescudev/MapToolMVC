@@ -1,0 +1,210 @@
+﻿@model List<MapToolMVC.Controllers.MapModel>
+@{
+    ViewBag.Title = "Home Page";
+    Layout = null;
+}
+<style>
+    #mapid {
+        height: 580px;
+    }
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+      integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+      crossorigin="" />
+<!-- Make sure you put this AFTER Leaflet's CSS -->
+<script src="~/Scripts/jquery-3.3.1.js"></script>
+<script src="~/Scripts/leaflet1.4.js"></script>
+<script>
+    var modelJavascript = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+</script>
+<div id="mapid"></div>
+<script>
+    var mymap = L.map('mapid').setView([44.4268, 26.1025], 13);
+    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+        maxZoom: 18,
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+            '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+            'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        id: 'mapbox.streets'
+    }).addTo(mymap);
+
+    var markerGroup = L.layerGroup().addTo(mymap);
+
+    mymap.on('contextmenu', function (ClickOptions) {
+        if ($("#newServiceId").val() === '') {
+            alert("insert new service id");
+            return;
+        }
+        var newServiceName = $("#newServiceId").val();
+
+        console.log(ClickOptions.latlng);
+        var marker = L.marker([ClickOptions.latlng.lat, ClickOptions.latlng.lng],
+            { id: newServiceName, draggable: 'true' });
+            var popup = new L.Popup({ 'autoClose': false, closeOnClick: false, draggable: 'true' });
+       
+        popup.setContent(`<div class="popupcontainer" id="` + newServiceName + `" style="color:red">
+                            Id:
+                            <input style="width: 75px;" onchange="changedSN(this)"
+                                oldvalue="`+ newServiceName +`"
+                                class="ServiceId" value="`+ newServiceName +`" />
+                            st.
+                            <input style="width: 30px;" onchange="updateDuration(this)" Id="Duration" value=`+ "0" +` />
+                            <br>
+                            Y
+                            <input style="width: 60px;" class="CoordY" value=`+ ClickOptions.latlng.lat +` />                           
+                            X
+                            <input style="width: 60px;" class="CoordX" value=`+ ClickOptions.latlng.lng +` />
+                            <button onclick="removeEl(this)">X</button>
+                            </div>`);
+
+        marker.addTo(markerGroup).bindPopup(popup).openPopup();
+        
+            modelJavascript.push({
+                "Id": newServiceName,
+                "CoordY": ClickOptions.latlng.lat,
+                "CoordX": ClickOptions.latlng.lng,
+                "Duration": 0,
+                "TimeWindows": []
+            });
+            marker.on('dragend', function (event) {
+                var marker = event.target;
+                console.log("Test");
+                var position = marker.getLatLng();
+                marker.openPopup();
+                setTimeout(function () {
+                    var $element = $("#" + event.target.options.id);
+                    $element.find(".CoordX").val(position.lng);
+                    $element.find(".CoordY").val(position.lat);
+                    for (var i = 0; i < modelJavascript.length; i++) {
+                        var curModelEl = modelJavascript[i].Id;
+                        if (curModelEl === event.target.options.id) {
+                            modelJavascript[i].CoordY = position.lat;
+                            modelJavascript[i].CoordX = position.lng;
+                            $element.find("#Duration").val(modelJavascript[i].Duration)
+                        }
+                    }
+
+                }, 5);
+            });
+            mymap.addLayer(marker);
+    });
+
+
+
+    @foreach (var mapModel in Model)
+    {
+     <text>
+        (function () {
+            var marker = L.marker([@mapModel.CoordY, @mapModel.CoordX],
+                { id: '@mapModel.Id', draggable: 'true' });
+            var popup = new L.Popup({ 'autoClose': false, closeOnClick: false, draggable: 'true' });
+
+            popup.setContent(`<div id="@mapModel.Id" style="color:red">
+        
+                            Id:
+                            <input style="width: 75px;" onchange="changedSN(this)"
+                                oldvalue="@mapModel.Id" 
+                                class="ServiceId" value="@mapModel.Id" />
+                            Y
+                            <input style="width: 60px;" id="CoordY" value=`+ @mapModel.CoordY +` />                           
+                            X
+                            <input style="width: 60px;"  id="CoordX" value=`+ @mapModel.CoordX +` />
+                            <br>
+                            St.
+                            <input onchange="updateDuration(this)"
+                                    oldvalue="@mapModel.Duration"
+                            style="width: 75px;"  id="Duration" value=`+ @mapModel.Duration +` />
+                          <button onclick="removeEl(this)">X</button>
+                            </div>`);
+
+            marker.addTo(markerGroup).bindPopup(popup).openPopup();
+
+            marker.on('dragend', function (event) {
+                var marker = event.target;
+                var position = marker.getLatLng();
+                marker.openPopup();
+                setTimeout(function () {
+                    var $element = $("#" + event.target.options.id);                    
+                    $element.find(".CoordX").val(position.lng);
+                    $element.find(".CoordY").val(position.lat);
+                    for (var i = 0; i < modelJavascript.length; i++) {
+                        var curModelEl = modelJavascript[i].Id;
+                        if (curModelEl === event.target.options.id) {
+                            modelJavascript[i].CoordY = position.lat;
+                            modelJavascript[i].CoordX = position.lng;
+                            $element.find("#Duration").val(modelJavascript[i].Duration)
+                        }
+                    }
+
+                }, 5);
+            });
+            mymap.addLayer(marker);
+
+        }());
+     </text>
+    }
+
+
+    function changedSN(element) {        
+        for (var i = 0; i < modelJavascript.length; i++) {
+            var curModelEl = modelJavascript[i].Id;
+            if (curModelEl === element.getAttribute("oldvalue")) {
+                modelJavascript[i].Id = element.value;
+                element.setAttribute("oldvalue", element.value);
+                element.parentElement.setAttribute("id", element.value);
+            }
+        }
+    }
+
+    function updateDuration(element) {
+        for (var i = 0; i < modelJavascript.length; i++) {
+            var elementId = $(element.parentElement).find(".ServiceId").val();
+            if (elementId === modelJavascript[i].Id) {
+                modelJavascript[i].Duration = element.value;
+                element.setAttribute("oldvalue", element.value);                
+            }
+        }
+    }
+
+    function removeEl(element) {
+        var serviceIdToRemove = element.parentElement.id;
+        for (var i = 0; i < modelJavascript.length; i++) {
+            if(serviceIdToRemove === modelJavascript[i].Id)
+                modelJavascript.splice(i, 1);
+        }
+        var keys = Object.keys(mymap._layers);
+        for (var i = 0; i < keys.length; i++) {
+            var curLayer = mymap._layers[keys[i]];
+            //   mymap.removeLayer(mymap._layers[51]);
+            if (typeof curLayer._source !== 'undefined') {
+                var idOfService = curLayer._source.options.id;
+                if (idOfService === serviceIdToRemove) {
+                    mymap.removeLayer(curLayer); // remove
+                    var markerIdToRemove = curLayer._source._leaflet_id;
+                    markerGroup.removeLayer(markerIdToRemove);
+                }
+            }
+        }
+     
+    }
+
+    function downloadJson() {
+        var modelToConstruct = [];
+        for (var i = 0; i < modelJavascript.length; i++) {            
+            modelToConstruct.push({
+                "Id": modelJavascript[i].Id,
+                "CoordY": modelJavascript[i].CoordY,
+                "CoordX": modelJavascript[i].CoordX,
+                "Duration": $("#" + modelJavascript[i].Id).find("#Duration").val(),
+                "TimeWindows": []
+            })
+        }
+        alert(JSON.stringify(modelToConstruct));
+    }
+</script>
+<input  placeholder="The id of the new service to create " style="width:300px;border:2px solid red" id="newServiceId"/>
+<button onclick="downloadJson()">DOWNLOAD JSON MODEL</button>
+<form action="/Home/IndexPost" target="_blank" method="post">
+    <input id="postTextArea" name="postTextArea">
+    <button> Open jsoned model in new window</button>
+</form>
